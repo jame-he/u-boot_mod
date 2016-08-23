@@ -155,7 +155,7 @@ static int httpd_findandstore_firstchunk(void){
 					// if we don't know the flash type, we won't allow to update ART,
 					// because we don't know flash size
 					if(info->flash_id == FLASH_CUSTOM){
-						printf("## Error: unknown flash type, can't update ART!\n");
+						printf("## Error: unknown FLASH type, can't update ART!\n");
 						webfailsafe_upload_failed = 1;
 					}
 #endif
@@ -193,9 +193,9 @@ static int httpd_findandstore_firstchunk(void){
 				// has correct size (for every type of upgrade)
 
 				// U-Boot
-				if((webfailsafe_upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT) && (hs->upload_total != WEBFAILSAFE_UPLOAD_UBOOT_SIZE_IN_BYTES)){
+				if((webfailsafe_upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT) && (hs->upload_total > WEBFAILSAFE_UPLOAD_UBOOT_SIZE_IN_BYTES)){
 
-					printf("## Error: wrong file size, should be: %d bytes!\n", WEBFAILSAFE_UPLOAD_UBOOT_SIZE_IN_BYTES);
+					printf("## Error: file too big!\n");
 					webfailsafe_upload_failed = 1;
 
 				// ART
@@ -465,6 +465,8 @@ void httpd_appcall(void){
 					} else {
 						printf("Data will be downloaded at 0x%X in RAM\n", WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
 					}
+
+					memset((void *)webfailsafe_data_pointer, 0xFF, WEBFAILSAFE_UPLOAD_UBOOT_SIZE_IN_BYTES);
 
 					if(httpd_findandstore_firstchunk()){
 						data_start_found = 1;

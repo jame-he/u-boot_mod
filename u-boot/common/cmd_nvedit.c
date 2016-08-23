@@ -232,7 +232,12 @@ int _do_setenv(int flag, int argc, char *argv[]){
 			}
 
 			if(i == N_BAUDRATES){
-				printf("## Error: baudrate %d bps not supported\n", baudrate);
+				printf("## Error: baudrate %d bps is not supported,\n", baudrate);
+				printf("          choose one from the list:\n\n");
+				for(i = 0; i < N_BAUDRATES; ++i){
+					printf("- %7d bps%s\n", baudrate_table[i], baudrate_table[i] == gd->baudrate ? " [current]" : "");
+				}
+				printf("\n");
 				return(1);
 			}
 
@@ -240,6 +245,9 @@ int _do_setenv(int flag, int argc, char *argv[]){
 			udelay(50000);
 
 			gd->baudrate = baudrate;
+
+			serial_setbrg();
+
 			udelay(50000);
 
 			for(;;){
@@ -389,15 +397,7 @@ void setenv(char *varname, char *varvalue){
 
 int do_setenv(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]){
 	if(argc < 2){
-#ifdef CFG_LONGHELP
-		if(cmdtp->help != NULL){
-			printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->help);
-		} else {
-			printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->usage);
-		}
-#else
-		printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->usage);
-#endif
+		print_cmd_help(cmdtp);
 		return(1);
 	}
 
@@ -422,29 +422,13 @@ int do_askenv( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]){
 	local_args[3] = NULL;
 
 	if(argc < 2){
-#ifdef CFG_LONGHELP
-		if(cmdtp->help != NULL){
-			printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->help);
-		} else {
-			printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->usage);
-		}
-#else
-		printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->usage);
-#endif
+		print_cmd_help(cmdtp);
 		return(1);
 	}
 	/* Check the syntax */
 	switch(argc){
 		case 1:
-#ifdef CFG_LONGHELP
-		if(cmdtp->help != NULL){
-			printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->help);
-		} else {
-			printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->usage);
-		}
-#else
-		printf("Usage:\n%s %s\n", cmdtp->name, cmdtp->usage);
-#endif
+		print_cmd_help(cmdtp);
 		return(1);
 
 		case 2: /* askenv envname */

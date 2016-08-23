@@ -35,6 +35,9 @@ COBJS	= main.o \
 		  cmd_custom.o \
 		  cmd_net.o \
 		  cmd_nvedit.o \
+		  cmd_itest.o \
+		  cmd_load.o \
+		  cmd_qcaclk.o \
 		  command.o \
 		  console.o \
 		  devices.o \
@@ -45,7 +48,11 @@ COBJS	= main.o \
 		  exports.o \
 		  flash.o \
 		  lists.o \
-		  env_flash.o
+		  env_flash.o \
+		  hush.o \
+		  xyzModem.o \
+		  crc16.o \
+		  s_record.o
 
 OBJS	= $(AOBJS) $(COBJS)
 
