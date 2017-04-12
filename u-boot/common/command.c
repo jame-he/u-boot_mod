@@ -27,7 +27,7 @@ int do_version(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	extern char version_string[];
 
 	puts("Version and build date:\n");
-	printf("  %s\n  " __DATE__ ", " __TIME__ "\n\n", version_string);
+	printf("  %s, " MK_STR(CONFIG_BUILD_DATE_UTC) "\n\n", version_string);
 
 	puts("Modification by:\n");
 	puts("  Piotr Dymacz <piotr@dymacz.pl>\n");
@@ -38,24 +38,38 @@ int do_version(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 U_BOOT_CMD(version, 1, 1, do_version, "print U-Boot version\n", NULL);
 
-#if (CONFIG_COMMANDS & CFG_CMD_ECHO)
+#if defined(CONFIG_CMD_ECHO)
 int do_echo(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
-	int i, putnl = 1;
+	int i;
+	int putnl = 1;
 
 	for (i = 1; i < argc; i++) {
-		char *p = argv[i], c;
+		char *p = argv[i];
+		char *nls; /* new-line suppression */
 
 		if (i > 1)
 			putc(' ');
 
-		while ((c = *p++) != '\0') {
-			if (c == '\\' && *p == 'c') {
-				putnl = 0;
-				p++;
-			} else {
-				putc(c);
+		nls = strstr(p, "\\c");
+		if (nls) {
+			char *prenls = p;
+
+			putnl = 0;
+			/*
+			 * be paranoid and guess that someone might
+			 * say \c more than once
+			 */
+			while (nls) {
+				*nls = '\0';
+				puts(prenls);
+				*nls = '\\';
+				prenls = nls + 2;
+				nls = strstr(prenls, "\\c");
 			}
+			puts(prenls);
+		} else {
+			puts(p);
 		}
 	}
 
@@ -68,7 +82,7 @@ int do_echo(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 U_BOOT_CMD(echo, CFG_MAXARGS, 1, do_echo,
 	"echo args to console\n", "[args..]\n"
 	"\t- echo args to console; \\c suppresses newline\n");
-#endif /* CFG_CMD_ECHO */
+#endif /* CONFIG_CMD_ECHO */
 
 #ifdef CFG_HUSH_PARSER
 int do_test(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
